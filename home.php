@@ -16,61 +16,64 @@
         .entry { margin-bottom: 15px; padding: 10px; border-bottom: 1px solid #333; }
         .ip { font-size: 1.3rem; color: #00c6ff; }
         .port { color: #00ffcc; margin: 5px; display: inline-block; text-decoration: none; }
-        .select-container { display: inline-block; text-align: center; }
+        .loading-message { font-size: 1.2rem; color: #ff7e5f; margin-top: 20px; }
+        .count { font-size: 1.2rem; color: #feb47b; margin-top: 10px; }
+        .time { font-size: 1.1rem; color: #ff7e5f; margin-top: 5px; }
 
-        /* Custom checkbox style */
-        input[type="checkbox"] {
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #ff7e5f;
-            border-radius: 4px;
-            position: relative;
-            background-color: #1e1e1e;
-            cursor: pointer;
-        }
-
-        input[type="checkbox"]:checked::before {
-            content: '✔';
-            position: absolute;
-            top: 1px;
-            left: 3px;
-            color: #ff7e5f;
-            font-size: 16px;
-        }
-
-        input[type="checkbox"]:hover {
-            background-color: #333;
-        }
-
-        /* Align checkbox and label in one line */
-        .checkbox-container {
-            display: inline-flex;
+        .corner-image { position: absolute; top: 10px; width: 100px; height: auto; }
+        #leftImage { left: 10px; }
+        #rightImage { right: 10px; }
+        .select-container {
+            display: flex;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
+            width: 100%;
         }
-        #manualCheck + label { margin-left: 10px; }
 
         #manualLabel {
-    vertical-align: middle;
-    margin-top: -1px; /* Adjust this value to control the vertical position */
+            vertical-align: middle;
+            margin-top: -1px; /* Adjust this value to control the vertical position */
+        }
+
+        .flex-container {
+    display: flex;
+    align-items: center;  /* Centers vertically */
+    justify-content: center;  /* Centers horizontally */
+    gap: 5px;  /* Adjust space between checkbox and label */
+    margin-top: 20px;
 }
-.corner-image {
+
+.flex-container input[type="checkbox"] {
+    display: none;
+
+}
+
+.flex-container label {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-left: 35px; /* Adjust space to fit the custom checkbox */
+}
+
+/* Custom checkbox style */
+.flex-container label::before {
+    content: '';
     position: absolute;
-    top: 10px; /* Adjust as needed */
-    width: 100px; /* Adjust size as needed */
-    height: auto;
+    left: 0;
+    top: 0;
+    width: 20px; /* Adjust width */
+    height: 20px; /* Adjust height */
+    border: 2px solid #ff7e5f;
+    background-color: #1e1e1e;
+    border-radius: 4px;
 }
 
-#leftImage {
-    left: 10px; /* Position image at the top-left corner */
+/* Change background color when checked */
+.flex-container input[type="checkbox"]:checked + label::before {
+    background-color: #ff7e5f;
 }
 
-#rightImage {
-    right: 10px; /* Position image at the top-right corner */
-}
-        
 
     </style>
 </head>
@@ -83,12 +86,11 @@
         <label for="country">Select a country</label>
         <select id="country" onchange="loadNetworks()"></select><br>
     </div>
-    
-    <label for="network">Select a network or input manually</label><br>
-    <div class="checkbox-container">
-        <input type="checkbox" id="manualCheck" onclick="toggleNetworkInput()"> 
-        <label id="manualLabel" for="manualCheck">Enter network manually</label>
-    </div><br><br>
+
+    <div class="flex-container">
+        <input type="checkbox" id="manualCheck" onclick="toggleNetworkInput()">
+        <label for="manualCheck" id="manualLabel">Enter network manually</label>
+    </div>
 
     <div id="networkSelection" class="select-container">
         <select id="network" disabled><option value="">Select a network</option></select><br>
@@ -102,6 +104,7 @@
 
     <button onclick="scanNetwork()">Scan</button>
 
+    <div id="loading" class="loading-message" style="display:none;">Scanning... Please wait.</div>
     <div id="result" class="result"></div>
 
     <script>
@@ -139,28 +142,25 @@
         }
 
         function toggleNetworkInput() {
-    const isChecked = document.getElementById('manualCheck').checked;
-    const networkSelection = document.getElementById('networkSelection');
-    const manualNetworkDiv = document.getElementById('manualNetworkDiv');
-    const countrySelect = document.getElementById('country');
-    const countryLabel = document.querySelector('label[for="country"]'); // Select the "Select a country" label
+            const isChecked = document.getElementById('manualCheck').checked;
+            const networkSelection = document.getElementById('networkSelection');
+            const manualNetworkDiv = document.getElementById('manualNetworkDiv');
+            const countrySelect = document.getElementById('country');
+            const countryLabel = document.querySelector('label[for="country"]');
 
-    if (isChecked) {
-        // Hide country label, country and network selection, show manual network input
-        countryLabel.style.display = 'none';
-        networkSelection.style.display = 'none';
-        countrySelect.style.display = 'none';
-        manualNetworkDiv.style.display = 'block';
-    } else {
-        // Show country label, country and network selection, hide manual network input
-        countryLabel.style.display = 'block';
-        networkSelection.style.display = 'block';
-        countrySelect.style.display = 'block';
-        manualNetworkDiv.style.display = 'none';
-        loadNetworks(); // Reload networks when checkbox is unchecked
-    }
-}
-
+            if (isChecked) {
+                countrySelect.style.display = 'none';
+                networkSelection.style.display = 'none';
+                if (countryLabel) countryLabel.style.display = 'none';
+                manualNetworkDiv.style.display = 'block';
+            } else {
+                countrySelect.style.display = 'flex'; // Keep it centered
+                networkSelection.style.display = 'flex'; // Keep it centered
+                if (countryLabel) countryLabel.style.display = 'block';
+                manualNetworkDiv.style.display = 'none';
+                loadNetworks();
+            }
+        }
 
         function scanNetwork() {
             let network = document.getElementById("network").value;
@@ -168,21 +168,51 @@
                 network = document.getElementById("manualNetwork").value;
             }
             const ports = document.getElementById("ports").value;
-            if (!network || !ports) { alert("Please select a network or input one manually, and enter ports."); return; }
+            if (!network || !ports) { 
+                alert("Please select a network or input one manually, and enter ports."); 
+                return; 
+            }
+
             document.getElementById("result").innerHTML = '';
-            fetch('/scan.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ address: network, ports }) })
-                .then(response => response.json())
-                .then(data => {
-                    let resultHTML = "<h3>Scan Results:</h3>";
-                    for (let ip in data) {
-                        resultHTML += `<div class='entry'><div class='ip'>${ip}</div>`;
-                        data[ip].forEach(port => { resultHTML += `<a href='http://${ip}:${port}' class='port' target='_blank'>${port}</a>`; });
-                        resultHTML += `</div>`;
-                    }
-                    document.getElementById("result").innerHTML = resultHTML;
-                })
-                .catch(error => { console.error("Error:", error); document.getElementById("result").innerText = "Error scanning."; });
+            document.getElementById("loading").style.display = 'block';
+
+            const startTime = new Date().getTime();
+
+            fetch('/scan.php', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ address: network, ports }) 
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("loading").style.display = 'none';
+
+                const endTime = new Date().getTime();
+                const timeTaken = ((endTime - startTime) / 1000).toFixed(2);
+
+                let totalResults = 0;
+                let resultHTML = `<h3>Scan Results:</h3>`;
+
+                for (let ip in data) {
+                    totalResults++;
+                    resultHTML += `<div class='entry'><div class='ip'>${ip}</div>`;
+                    data[ip].forEach(port => { 
+                        resultHTML += `<a href='http://${ip}:${port}' class='port' target='_blank'>${port}</a>`; 
+                    });
+                    resultHTML += `</div>`;
+                }
+
+                let summary = `<div class="count">Total Results: ${totalResults}</div>`;
+                summary += `<div class="time">Time Taken: ${timeTaken} seconds</div>`;
+                
+                document.getElementById("result").innerHTML = summary + resultHTML;
+            })
+            .catch(error => { 
+                document.getElementById("loading").style.display = 'none';
+                console.error("Error:", error); 
+                document.getElementById("result").innerText = "Error scanning."; 
+            });
         }
     </script>
 </body>
-</html>
+</html

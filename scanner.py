@@ -14,7 +14,7 @@ def scan_port(ip, port, timeout=1):
         pass
     return None
 
-def scan_host(ip, ports, max_threads=10):
+def scan_host(ip, ports, max_threads=200):
     """Scans all specified ports on a single IP using multithreading."""
     open_ports = []
     with ThreadPoolExecutor(max_threads) as executor:
