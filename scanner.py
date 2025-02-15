@@ -2,6 +2,7 @@ import socket
 import ipaddress
 import argparse
 from concurrent.futures import ThreadPoolExecutor
+import json
 
 def scan_port(ip, port, timeout=1):
     """Scans a single port on a given IP."""
@@ -58,7 +59,7 @@ if __name__ == "__main__":
     results = scan_network(args.network, port_list)
 
     # print("\nScan completed.")
-    import json
+    
 
 # Assuming 'results' is a dictionary with host: open_ports as key-value pairs
 if results:
@@ -67,5 +68,5 @@ if results:
     print(json.dumps(json_output, indent=4))  # Convert to JSON format and print
 else:
     # Output a JSON with no open ports
-    print(json.dumps({"message": "❌ No open ports found."}, indent=4))
+    print(json.dumps({"message": "no results"}, indent=4))
 

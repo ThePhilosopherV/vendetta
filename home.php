@@ -74,6 +74,7 @@
     background-color: #ff7e5f;
 }
 
+.port.clicked { color: #ff0000; } /* Change color when clicked */
 
     </style>
 </head>
@@ -188,31 +189,47 @@
                 document.getElementById("loading").style.display = 'none';
 
                 const endTime = new Date().getTime();
-                const timeTaken = ((endTime - startTime) / 1000).toFixed(2);
+                let timeTaken = ((endTime - startTime) / 1000).toFixed(2);
+                if (timeTaken > 60) {
+                    timeTaken = (timeTaken / 60).toFixed(2) + " minutes";
+                } else {
+                    timeTaken += " seconds";
+                }
 
                 let totalResults = 0;
-                let resultHTML = `<h3>Scan Results:</h3>`;
+                let resultHTML = "";
 
-                for (let ip in data) {
-                    totalResults++;
-                    resultHTML += `<div class='entry'><div class='ip'>${ip}</div>`;
-                    data[ip].forEach(port => { 
-                        resultHTML += `<a href='http://${ip}:${port}' class='port' target='_blank'>${port}</a>`; 
-                    });
-                    resultHTML += `</div>`;
+                if (data.message === "no results") {
+                    resultHTML += `<div class='entry'>No results found.</div>`;
+                } else {
+                    for (let ip in data) {
+                        totalResults++;
+                        if (totalResults === 1) {
+                            resultHTML += `<h3>Scan Results:</h3>`;
+                        }
+                        resultHTML += `<div class='entry'><div class='ip'>${ip}</div>`;
+                        data[ip].forEach(port => { 
+                            resultHTML += `<a href='http://${ip}:${port}' class='port' target='_blank' onclick='markAsClicked(this)'>${port}</a>`; 
+                        });
+                        resultHTML += `</div>`;
+                    }
                 }
 
                 let summary = `<div class="count">Total Results: ${totalResults}</div>`;
-                summary += `<div class="time">Time Taken: ${timeTaken} seconds</div>`;
+                summary += `<div class="time">Time Taken: ${timeTaken}</div>`;
                 
                 document.getElementById("result").innerHTML = summary + resultHTML;
             })
             .catch(error => { 
                 document.getElementById("loading").style.display = 'none';
                 console.error("Error:", error); 
-                document.getElementById("result").innerText = "Error scanning."; 
+                document.getElementById("result").innerHTML = `<div class="count">Total Results: 0</div><div class="time">Time Taken: ${timeTaken}</div>`;
             });
+        }
+
+        function markAsClicked(element) {
+            element.classList.add('clicked');
         }
     </script>
 </body>
-</html
+</html>
